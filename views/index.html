@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Express.js Project</title>
+  <style>
+  :root {
+    --bg-primary: #1e1e1e;
+    --bg-secondary: #252526;
+    --bg-tertiary: #333;
+    --text-primary: #d4d4d4;
+    --text-secondary: #9cdcfe;
+    --text-accent: #569cd6;
+    --text-comment: #608b4e;
+    --text-string: #ce9178;
+    --text-function: #dcdcaa;
+    --text-keyword: #c586c0;
+    --text-number: #b5cea8;
+    --border-color: #454545;
+    --accent-color: #0f80ff;
+    --accent-hover: #1f8fff;
+    --error-color: #f44747;
+  }
+  
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    font-family: 'Consolas', 'Courier New', monospace;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+  }
+  
+  header {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  header h1 {
+    color: var(--accent-color);
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+  
+  .header-tabs {
+    display: flex;
+  }
+  
+  .header-tab {
+    padding: 0.5rem 1rem;
+    margin-left: 4px;
+    background-color: var(--bg-secondary);
+    border-radius: 4px 4px 0 0;
+    border-top: 2px solid transparent;
+  }
+  
+  .header-tab.active {
+    background-color: var(--bg-primary);
+    border-top: 2px solid var(--accent-color);
+  }
+  
+  .container {
+    display: flex;
+    height: calc(100vh - 105px);
+  }
+  
+  .sidebar {
+    width: 250px;
+    background-color: var(--bg-secondary);
+    padding: 1rem;
+    border-right: 1px solid var(--border-color);
+    overflow-y: auto;
+  }
+  
+  .sidebar-item {
+    padding: 0.3rem 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    color: var(--text-primary);
+  }
+  
+  .sidebar-item:hover {
+    color: var(--text-secondary);
+  }
+  
+  .sidebar-item::before {
+    content: "📄";
+    margin-right: 0.5rem;
+  }
+  
+  .sidebar-item.folder::before {
+    content: "📁";
+  }
+  
+  main {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+  }
+  
+  section {
+    margin-bottom: 2rem;
+  }
+  
+  h2 {
+    color: var(--text-accent);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  p {
+    margin-bottom: 1rem;
+  }
+  
+  a {
+    color: var(--accent-color);
+    text-decoration: none;
+  }
+  
+  a:hover {
+    text-decoration: underline;
+    color: var(--accent-hover);
+  }
+  
+  ul {
+    list-style-type: none;
+    margin-left: 1rem;
+  }
+  
+  li {
+    margin-bottom: 0.5rem;
+  }
+  
+  li::before {
+    content: "→";
+    color: var(--text-function);
+    margin-right: 0.5rem;
+  }
+  
+  .code-block {
+    background-color: var(--bg-secondary);
+    padding: 1rem;
+    border-radius: 4px;
+    overflow-x: auto;
+    margin-bottom: 1rem;
+    border-left: 3px solid var(--accent-color);
+    white-space: pre;
+    font-family: 'Consolas', 'Courier New', monospace;
+    line-height: 1.4;
+  }
+  
+  .folder-name {
+    color: var(--text-function);
+  }
+  
+  .file-name {
+    color: var(--text-secondary);
+  }
+  
+  .extension {
+    color: var(--text-number);
+  }
+  
+  .tree-structure {
+    color: var(--text-comment);
+  }
+  
+  .status-bar {
+    background-color: var(--bg-tertiary);
+    padding: 0.5rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid var(--border-color);
+    font-size: 0.8rem;
+  }
+  
+  .status-item {
+    display: flex;
+    align-items: center;
+  }
+  
+  .status-item::before {
+    content: "⚫";
+    margin-right: 0.5rem;
+    font-size: 0.6rem;
+    color: var(--accent-color);
+  }
+  
+  .grid-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+  
+  @media (max-width: 1024px) {
+    .grid-container {
+      grid-template-columns: 1fr;
+    }
+    
+    .container {
+      flex-direction: column;
+      height: auto;
+    }
+    
+    .sidebar {
+      width: 100%;
+      border-right: none;
+      border-bottom: 1px solid var(--border-color);
+      max-height: 200px;
+    }
+  }
+  
+  .card {
+    background-color: var(--bg-secondary);
+    border-radius: 4px;
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+  }
+  
+  .terminal {
+    background-color: #121212;
+    color: #33ff33;
+    padding: 1rem;
+    border-radius: 4px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    margin-top: 2rem;
+  }
+  
+  .terminal::before {
+    content: "$ ";
+    color: var(--text-function);
+  }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>./projet-express</h1>
+    <div class="header-tabs">
+      <div class="header-tab active">index.html</div>
+      <div class="header-tab">app.js</div>
+      <div class="header-tab">server.js</div>
+    </div>
+  </header>
+  
+  <div class="container">
+    <div class="sidebar">
+      <div class="sidebar-item folder">PROJECT-ROOT</div>
+      <div class="sidebar-item">package.json</div>
+      <div class="sidebar-item">app.js</div>
+      <div class="sidebar-item">server.js</div>
+      <div class="sidebar-item folder">config</div>
+      <div class="sidebar-item folder">routes</div>
+      <div class="sidebar-item folder">controllers</div>
+      <div class="sidebar-item folder">models</div>
+      <div class="sidebar-item folder">middlewares</div>
+      <div class="sidebar-item folder">public</div>
+      <div class="sidebar-item folder">views</div>
+    </div>
+    
+    <main>
+      <section>
+        <h2>// À propos</h2>
+        <p>Ceci est un exemple de projet ExpressJS structuré.</p>
+      </section>
+      
+      <section>
+        <h2>// Structure du projet</h2>
+        <p>Voici la structure de base du projet:</p>
+        <div class="code-block"><span class="folder-name">PROJECT-ROOT</span>/
+├── <span class="file-name">package</span><span class="extension">.json</span>
+├── <span class="file-name">app</span><span class="extension">.js</span>
+├── <span class="file-name">server</span><span class="extension">.js</span>
+├── <span class="folder-name">config</span>/
+│   └── <span class="file-name">db</span><span class="extension">.js</span>
+├── <span class="folder-name">routes</span>/
+│   ├── <span class="file-name">index</span><span class="extension">.js</span>
+│   ├── <span class="file-name">users</span><span class="extension">.js</span>
+│   └── <span class="file-name">products</span><span class="extension">.js</span>
+├── <span class="folder-name">controllers</span>/
+│   ├── <span class="file-name">userController</span><span class="extension">.js</span>
+│   └── <span class="file-name">productController</span><span class="extension">.js</span>
+├── <span class="folder-name">models</span>/
+│   ├── <span class="file-name">userModel</span><span class="extension">.js</span>
+│   └── <span class="file-name">productModel</span><span class="extension">.js</span>
+├── <span class="folder-name">middlewares</span>/
+│   └── <span class="file-name">auth</span><span class="extension">.js</span>
+├── <span class="folder-name">public</span>/
+│   ├── <span class="folder-name">css</span>/
+│   │   └── <span class="file-name">style</span><span class="extension">.css</span>
+│   ├── <span class="folder-name">js</span>/
+│   │   └── <span class="file-name">main</span><span class="extension">.js</span>
+│   └── <span class="folder-name">images</span>/
+│       └── <span class="file-name">logo</span><span class="extension">.png</span>
+└── <span class="folder-name">views</span>/
+    ├── <span class="file-name">index</span><span class="extension">.html</span>
+    └── <span class="file-name">404</span><span class="extension">.html</span></div>
+      </section>
+      
+      <div class="grid-container">
+        <div class="card">
+          <h2>// Routes</h2>
+          <p>Voici quelques routes disponibles:</p>
+          <ul>
+            <li><a href="/">Root</a></li>
+            <li><a href="/api/users">Liste des utilisateurs</a></li>
+            <li><a href="/api/products">Liste des produits</a></li>
+          </ul>
+        </div>
+        
+        <div class="card">
+          <h2>// API</h2>
+          <p>Essayez ces endpoints:</p>
+          <ul>
+            <li><a href="/api/status">Statut de l'API</a></li>
+            <li><a href="/api/users">Liste des utilisateurs</a></li>
+            <li><a href="/api/products">Liste des produits</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="terminal">
+        npm start
+        <br>
+        <span style="color: #33ff33;">Server running on port 3000</span>
+      </div>
+    </main>
+  </div>
+  
+  <div class="status-bar">
+    <div class="status-item">Express.js</div>
+    <div class="status-item">© 2025 Sajo</div>
+  </div>
+</body>
+</html>
